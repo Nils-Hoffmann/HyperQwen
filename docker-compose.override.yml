@@ -3,10 +3,14 @@ services:
     image: ghcr.io/syv-ai/hyperqwen@sha256:e99df7e6dc73208971ae0d1f1063deb100c997308248f253174176cf0514cb9e
   single:
     image: ghcr.io/syv-ai/hyperqwen@sha256:e99df7e6dc73208971ae0d1f1063deb100c997308248f253174176cf0514cb9e
+    # CDI instead of the nvidia device driver (NixOS nvidia-container-toolkit)
+    deploy: !reset {}
+    devices:
+      - nvidia.com/gpu=all
     volumes:
-      - /home/nils/projects/comfy-headless/patches/cumem.py:/app/venv/lib/python3.12/site-packages/vllm/device_allocator/cumem.py:ro
+      - ../projects/comfy-headless/patches/cumem.py:/app/venv/lib/python3.12/site-packages/vllm/device_allocator/cumem.py:ro
       # VISION=1 + sleep mode on WSL2: build DFlash drafter embed/lm_head placeholders on meta (see file)
-      - /home/nils/HyperQwen/local-patches/dflash-meta-placeholders:/opt/hq-patches:ro
+      - ./local-patches/dflash-meta-placeholders:/opt/hq-patches:ro
     environment:
       PYTHONPATH: /opt/hq-patches
     ports: !override
@@ -17,7 +21,7 @@ services:
     ports:
       - "0.0.0.0:18020:8080"
     volumes:
-      - /home/nils/projects/gpu-middleware/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../projects/gpu-middleware/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - single
     restart: unless-stopped
